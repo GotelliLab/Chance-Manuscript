@@ -1,0 +1,20 @@
+---
+title: "Monte Carlo Tests For Species Co-occurrence"
+author: "Nick Gotelli"
+date: "October 21, 2015"
+output: 
+  html_document: 
+    highlight: haddock
+    keep_md: yes
+    number_sections: yes
+    theme: cerulean
+---
+
+## Introduction
+## 2 x 2 table of species associations
+## Binary presence absence matrix
+## Null model procedure
+## Fixed rows
+## Fixed columns
+## Fixed-fixed curve ball algorithm
+## Other approaches
