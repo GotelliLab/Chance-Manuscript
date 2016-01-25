@@ -34,7 +34,7 @@ m <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),m$value))
 
 p <- ggplot( m, aes(x=V2, y=V1, fill=V3))
 p + geom_tile()
-
+ 
 
 ```
 
@@ -45,8 +45,31 @@ Figure 1. A binary presence-absence matrix. Each row represents a different spec
 
 In 1975, the ecologist Jared Diamond (best known for his 1999 Pulitzer-Prize-winning book *Guns, Germs, and Steel: The Fates of Human Societies*), asserted that these kinds of matrices contained the statistical signature of strong species interactions, which he boldly outlined as a series of community "assembly rules".
 
-In one of his assembly rules, Diamond proposed that some pairs of species were such strong competitors that they never occured together on the same island, forming a "checkerboard distribution". For example, from the matrix above, we notice that the species in rows 3 and 6 (x and y) form a checkerboard pair and never co-occur:
+In one of his assembly rules, Diamond proposed that some pairs of species were such strong competitors that they never occured together on the same island, forming a "checkerboard distribution". For example, from the matrix above, we notice that the species in rows 8 and 10 (*Loxigilla noxis* and *Tiara olivacea*) form a checkerboard pair and never co-occur:
 
+```{r}
+m <- melt(dataWiFinches[c(8,10),])
+m <- as.data.frame(cbind(rep(1:2,19),rep(1:19,each=2),m$value))
+
+p <- ggplot( m, aes(x=V2, y=V1, fill=V3))
+p + geom_tile()
+
+```
+
+The data can be organized into a two-way contingency table:
+
+```{r echo=FALSE}
+Mychecker <- dataWiFinches[c(8,10),-1]
+Mychecker <- as.matrix(Mychecker)
+MyCon <- matrix(0,nrow=2,ncol=2, dimnames = list(c("A_pres","A_abs"),c("B_pres","B_abs")))
+MyCon[1,1] <- sum(Mychecker[1,]==1 & Mychecker[2,]==1)
+MyCon[1,2] <- sum(Mychecker[1,]==1 & Mychecker[2,]==0)
+MyCon[2,1] <- sum(Mychecker[1,]==0 & Mychecker[2,]==1)
+MyCon[2,2] <- sum(Mychecker[1,]==0 & Mychecker[2,]==0)
+(MyCon)
+```
+
+and a Fisher's exact test yields (
 ### Figure 2 here
 
 If we treat each island as a statistical replicate, these data can be analyzed as a 2 x 2 contingency table. Fisher's exact test can be used to ask whether the occurrence of species X is independent of that of species Y. 
