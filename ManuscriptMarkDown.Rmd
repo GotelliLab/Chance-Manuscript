@@ -4,11 +4,11 @@ title: 'Checkerboards And Missing Species Combinations: Are Ecological Communiti
 author: "Nicholas J. Gotelli"
 date: "24 January 2016"
 output:
-  pdf_document: default
   html_document:
-    highlight: haddock
+    highlight: tango
     keep_md: yes
     theme: cerulean
+  pdf_document: default
   word_document: default
 ---
 
@@ -23,6 +23,22 @@ It is too much work to identify all of the different species of vertebrates, inv
 For example, here is a matrix illustrating the occurrence of the 27 species of finches (Subfamily Fringillidae) on the 25 major islands of the Greater and Lesser Antilles. Most of these species feed on seeds, which might be a shared, limiting resource that prevents all species from living together on the same island.
 
 ### Figure 1 here
+
+```{r}
+library(EcoSimR)
+library(ggplot2)
+library(reshape2)
+set.seed(2016)
+m <- melt(dataWiFinches)
+m <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),m$value))
+
+p <- ggplot( m, aes(x=V2, y=V1, fill=V3))
+p + geom_tile()
+
+
+```
+
+
 
 Figure 1. A binary presence-absence matrix. Each row represents a different species of island bird (finches in the Subfamily Fringillidae), and each column represents a different island. Ecologists have often used these kinds of data matrices to infer whether species interactions are present.
 
