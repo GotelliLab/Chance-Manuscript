@@ -6,7 +6,6 @@ date: "24 January 2016"
 output:
   html_document:
     highlight: tango
-    keep_md: yes
     theme: cerulean
   pdf_document: default
   word_document: default
@@ -24,18 +23,17 @@ For example, here is a matrix illustrating the occurrence of the 27 species of f
 
 ### Figure 1 here
 
-```{r}
+```{r echo=FALSE}
 library(EcoSimR)
 library(ggplot2)
 library(reshape2)
+library(knitr)
 set.seed(2016)
 m <- melt(dataWiFinches)
 m <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),m$value))
 
 p <- ggplot( m, aes(x=V2, y=V1, fill=V3))
-p + geom_tile()
- 
-
+p + geom_tile() + theme(legend.position="none") + xlab("Islands") + ylab("Species")
 ```
 
 
@@ -47,12 +45,12 @@ In 1975, the ecologist Jared Diamond (best known for his 1999 Pulitzer-Prize-win
 
 In one of his assembly rules, Diamond proposed that some pairs of species were such strong competitors that they never occured together on the same island, forming a "checkerboard distribution". For example, from the matrix above, we notice that the species in rows 8 and 10 (*Loxigilla noxis* and *Tiara olivacea*) form a checkerboard pair and never co-occur:
 
-```{r}
+```{r echo=FALSE}
 m <- melt(dataWiFinches[c(8,10),])
 m <- as.data.frame(cbind(rep(1:2,19),rep(1:19,each=2),m$value))
 
 p <- ggplot( m, aes(x=V2, y=V1, fill=V3))
-p + geom_tile()
+p + geom_tile() + theme(legend.position="none") + xlab("Islands") + ylab("Species")
 
 ```
 
@@ -61,15 +59,16 @@ The data can be organized into a two-way contingency table:
 ```{r echo=FALSE}
 Mychecker <- dataWiFinches[c(8,10),-1]
 Mychecker <- as.matrix(Mychecker)
-MyCon <- matrix(0,nrow=2,ncol=2, dimnames = list(c("A_pres","A_abs"),c("B_pres","B_abs")))
+MyCon <- matrix(0,nrow=2,ncol=2, dimnames = list(c("Species A Present","Species A Absent"),c("Species B Present","Species B Absent")))
 MyCon[1,1] <- sum(Mychecker[1,]==1 & Mychecker[2,]==1)
 MyCon[1,2] <- sum(Mychecker[1,]==1 & Mychecker[2,]==0)
 MyCon[2,1] <- sum(Mychecker[1,]==0 & Mychecker[2,]==1)
 MyCon[2,2] <- sum(Mychecker[1,]==0 & Mychecker[2,]==0)
-(MyCon)
+kable(MyCon, padding=0)
 ```
 
 and a Fisher's exact test yields (
+
 ### Figure 2 here
 
 If we treat each island as a statistical replicate, these data can be analyzed as a 2 x 2 contingency table. Fisher's exact test can be used to ask whether the occurrence of species X is independent of that of species Y. 
