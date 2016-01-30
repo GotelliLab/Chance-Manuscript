@@ -4,14 +4,16 @@ title: 'Checkerboards And Missing Species Combinations: Are Ecological Communiti
 author: "Nicholas J. Gotelli"
 date: "24 January 2016"
 output:
-  word_document: default
   pdf_document:
     fig_caption: yes
   html_document:
     fig_caption: yes
     highlight: tango
     theme: cerulean
+  word_document: default
 ---
+
+## The Search For Community Assembly Rules
 
 How are communities of plants and animals organized in nature?  This is a challenging question, because there are too many species in most communities to study this problem experimentally. For example, even with only 3 species (A,B, and C), there are 8 different "communities" or distinct species combinations that can be formed, based on the presence or absence of each species in the community: 0, A, B, C, AB, BC, AC, and ABC. With S species, there are 2^S^ possible species combinations that can be formed, which is far too many for a wieldy experiment. 
 
@@ -21,7 +23,8 @@ The data for such an analysis can be represented as a binary matrix in which eac
 
 It is too much work to identify all of the different species of vertebrates, invertebrates, plant, and microbes on a set of islands, or even a single island. Instead, ecologists have usually restricted their analysis to a single taxonomic group of organisms that have similar body sizes and similar life histories. Such collections (or "ecological guilds") of species may often be competing for shared food or habitat resources.
 
-For example, here is a matrix illustrating the occurrence of the 17 species of finches (Subfamily Fringillidae) on the 19 major islands of the Greater and Lesser Antilles. Most of these species feed on seeds, which might be a shared, limiting resource that prevents all species from living together on the same island.
+For example, Figure 1 illustrates the occurrence of the 17 species of finches (Family Fringillidae) on the 19 major islands of the Greater and Lesser Antilles. Most of these species feed on seeds, which might be a shared, limiting resource that prevents all species from living together on the same island.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Multiple plot function
 #
@@ -71,7 +74,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 ```
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Figure 1. A binary presence-absence matrix. Each row represents a different species of island bird (finches in the Subfamily Fringillidae), and each column represents a different island. Ecologists have often used these kinds of data matrices to infer whether species interactions are present."}
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="A binary presence-absence matrix. Each row represents a different species of island bird (finches in the Subfamily Fringillidae), and each column represents a different island. Ecologists have often used these kinds of data matrices to infer whether species interactions are present."}
 library(EcoSimR)
 library(ggplot2)
 library(grid)
@@ -87,11 +90,13 @@ print(p)
 
 
 
-Is the pattern of presences and absences in this matrix random? If so, does it reflect species interactions? These kinds of matrices have formed a kind of Rorschach Test for community ecologists. In 1975, the ecologist Jared Diamond (best known for his 1999 Pulitzer-Prize-winning book *Guns, Germs, and Steel: The Fates of Human Societies*), asserted that these kinds of matrices contained the statistical signature of strong species interactions, which he boldly outlined as a series of community "assembly rules".
+Is the pattern of presences and absences in this matrix random? If so, does it reflect species interactions? These matrices have functioned as a kind of Rorschach Test for community ecologists. In 1975, the ecologist Jared Diamond (best known for his 1999 Pulitzer-Prize-winning book *Guns, Germs, and Steel: The Fates of Human Societies*), asserted that these kinds of matrices contained the statistical signature of strong species interactions, which he boldly outlined as a series of community "assembly rules".
 
-One of Diamond's assembly rules was that some pairs of species were such strong competitors that they never occured together on the same island, forming a "checkerboard distribution". For example, from the matrix above, we notice that the species in rows 8 and 10 (*Loxigilla noxis* and *Tiara olivacea*) form a checkerboard and never co-occur:
+## Checkerboard Distributions
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap=" Figure 2. A perfect bioegeographic checkerboard: each island supports one species, or the other, but never both."}
+One of Diamond's assembly rules was that some pairs of species were such strong competitors that they never occurred together on the same island, forming a "checkerboard distribution". For example, in the West Indies finch matrix, the species in rows 8 and 10 (*Loxigilla noxis* and *Tiara olivacea*) form a checkerboard and never co-occur (Figure 2).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap=" A perfect bioegeographic checkerboard: each island supports one species, or the other, but never both."}
 m <- melt(dataWiFinches[c(8,10),])
 m <- as.data.frame(cbind(rep(1:2,19),rep(1:19,each=2),m$value))
 
@@ -99,7 +104,7 @@ p <- ggplot( m, aes(x=V2, y=V1, fill=V3)) + geom_tile() + theme(legend.position=
 print(p)
 ```
 
-The data can be organized into a two-way contingency table:
+
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 Mychecker <- dataWiFinches[c(8,10),-1]
@@ -109,30 +114,30 @@ MyCon[1,1] <- sum(Mychecker[1,]==1 & Mychecker[2,]==1)
 MyCon[1,2] <- sum(Mychecker[1,]==1 & Mychecker[2,]==0)
 MyCon[2,1] <- sum(Mychecker[1,]==0 & Mychecker[2,]==1)
 MyCon[2,2] <- sum(Mychecker[1,]==0 & Mychecker[2,]==0)
-kable(MyCon, padding=0)
+kable(MyCon, padding=0, align="r", caption="A contingency table of species incidences from the checkerboard distribution in Figure 2.")
 ```
 
-and a Fisher's exact test of the null hypothesis that the presence of Species A is independent of the presence of Species B yields p = `r fisher.test(MyCon)$p.value`.
+The data can be organized into a two-way contingency table (Table 1) and a Fisher's exact test of the null hypothesis that the presence of Species A is independent of the presence of Species B yields p = `r round(fisher.test(MyCon)$p.value, digits = 3)`.
 
 However, Diamond did not emphasize the pattern for a single species in the assemblage. Rather, he argued that these checkerboard pairs could frequently be found in a community, and that the frequent occurrence of such pairs indicated competition for limited resources was generally important in organizing communities. For the West Indies finch matrix, there are 91 pairs of species that form perfect checkerboards.
 
-Diamond's second assembly rule was based on the observation that some species combinations were never observed in nature. His inference was that these missing combinations were "forbidden" and again reflected the signature of interspecific competition. For the West Indies finch matrix, there are only x unique species combinations represented on the islands that are sampled.
+## Missing Species Combinations
 
-But how many checkerboard pairs and how many species combinations would be expected if species interactions were *not* important? This is the null hypothesis that was not tested explicitly in Diamond's paper.
+Diamond's second assembly rule was based on the observation that some species combinations were never observed in nature. He asserted that these missing combinations were "forbidden" and again reflected the signature of interspecific competition. For the West Indies finch matrix, there are only 10 unique species combinations represented on these islands.
 
-Is 91 checkerboards more than we would expect by chance? With 17 species, there are `r 17*16/2` unique pairs that can be formed, so perhaps finding $91/136$ = `r 91/136` checkerboards pairs of species is not so extreme. Similarly, with 17 species, there are $2^{17}$ = `r 2^17` possible species combinations that could be formed. But with a sample of only 19 islands, the maximum possible value is only 19, which would happen if every island had a unique mixture of species. The observed number was 10. Is 10 combinations represented in a sample of 19 islands sampled unusually small, given that $2^{17}$ combinations are theoretically possible?
+But how many checkerboard pairs and how many species combinations would be expected if species interactions were *not* important? This is the null hypothesis that was not tested explicitly in Diamond's paper. Is 91 checkerboards more than we would expect by chance? With 17 species, there are `r 17*16/2` unique pairs that can be formed, so perhaps finding 91 checkerboard pairs of species is not so extreme. Similarly, with 17 species, there are 2^17^ = `r as.integer(2^17,digits=0)` possible species combinations that could be formed. But with a sample of only 19 islands, the maximum possible value is only 19, which would happen if every island had a unique mixture of species. The observed number was 10. Is 10 combinations represented in a sample of 19 islands sampled unusually small, given that `r as.integer(2^17,digits=0)` combinations are theoretically possible?
 
-In a provocative response to Diamond (1975), Connor and Simberloff (1979) introduced a Monte Carlo analysis (usually referred to  by ecologists as a "null model analysis") to address that question.
+## Constructing A Null Matrix
 
-Connor and Simberloff asked: what would this matrix look like if each species colonized the different islands independently and species interactions were not important? Answering that question precisely would require a detailed ecological model with species-specific parameters for colonization, extinction, and persistence. There are many such models in the theoretical ecology literature, but getting the data to estimate all of those parameters is another story.
+In a provocative response to Diamond, the ecologists Ed Connor and Dan Simberloff introduced a Monte Carlo analysis (usually referred to  by ecologists as a "null model analysis") to address that question. Connor and Simberloff asked: what would this matrix look like if each species colonized the different islands independently and species interactions were not important? Answering that question precisely would require a detailed ecological model with species-specific parameters for colonization, extinction, and persistence. There are many such models in the theoretical ecology literature, but getting the data to estimate all of those parameters is another story.
 
-Connor and Simberloff argued that a randomization or reshuffling of the existing data matrix might mimic the properties of a null or non-interactive community, without getting bogged down in the problem of estimating colonzation and extinction parameters. 
+Connor and Simberloff argued that a randomization or reshuffling of the existing data matrix might mimic the properties of a null or non-interactive community, without getting bogged down in the problem of estimating colonization and extinction parameters. 
 
-Following standard Monte Carlo procedure, Connor and Simberloff randomized the observed presence-absence matrix, and calculated the number of checkerboard pairs and the number of species combinations that were found in this null matrix. Repeating this process 1000 times yields a distribution of the number of checkerboard pairs for this null hypothesis. Using a standard frequentist approach, we can then compare with the observed data and calculate how extreme or improbable the data are, given this null hypothesis as $(p(\text{Observed number of checkerboards} | H_0))$. The same procedure could be used to evaluate the number of species combinations that are found in the matrix.
+Following standard Monte Carlo procedure, Connor and Simberloff randomized the observed presence-absence matrix, and calculated the number of checkerboard pairs and the number of species combinations that were found in this null matrix. Repeating this process 1000 times yields a distribution of the number of checkerboard pairs for this null hypothesis. Using a standard frequentist approach, we can then compare with the observed data and calculate how extreme or improbable the data are, given this null hypothesis as (*p*(Observed number of checkerboards | *H~0~*). The same procedure could be used to evaluate the number of species combinations that are found in the matrix.
 
-But exactly how should the observed data be reshuffled to mimic a colonization extinction model in which species occurrences on islands are independent of one another? The devil is in the details, and the development of different algorithms for randomizing a presence-absence matrix and quantifying the patterns has remained an active research frontier for over 35 years.
+## Shuffling Algorithms
 
-The simplest initial approach is a kind of "isotropic" null hypothesis in which we simply reshuffle with equal probability all of the matrix elements. This null model preserves the dimensions of the matrix (the number of rows and columsn) and it preserves, the "fill" of the matrix, that is the proportion of presences (0.xx for the West Indices finch matrix). But there are no other constraints on the occurrence of species on islands. Here is one such matrix, created by randomizing the occurrences in the original finch matrix:
+But exactly how should the observed data be reshuffled to mimic a colonization extinction model in which species occurrences on islands are independent of one another? The devil is in the details, and the development of different algorithms for randomizing a presence-absence matrix and quantifying the patterns has remained an active research frontier for over 35 years. The simplest initial approach is a kind of "isotropic" null hypothesis in which we simply reshuffle with equal probability all of the matrix elements. This null model preserves the dimensions of the matrix (the number of rows and columns) and it preserves, the "fill" of the matrix, that is the proportion of presences (0.17 for the West Indices finch matrix). But there are no other constraints on the occurrence of species on islands. Here is one such matrix, created by randomizing the occurrences in the original finch matrix:
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 MyModel <- cooc_null_model(speciesData=dataWiFinches,metric="species_combo", algo="sim1",   suppressProg=TRUE)
@@ -144,7 +149,7 @@ Mat1 <- ggplot(m.combo, aes(x=V2, y=V1, fill=V3)) + geom_tile() + theme(legend.p
 ```
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap=" Figure 3. An unconstrained randomization of the data in Figure 1."}
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap=" An unconstrained randomization of the data in Figure 1."}
 MyModel2 <- cooc_null_model(speciesData=dataWiFinches,metric="checker", algo="sim1",   suppressProg=TRUE)
 m.checker <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),as.vector(MyModel2$Randomized.Data)))
 
@@ -156,7 +161,7 @@ print(Mat2)
 
 Here are the results for the 1000 randomizations of the West Indies finch matrix, with separate analyses for the number of checkerboard pairs and the number of species combinations. By this test, we would conclude that there are fewer checkerboard pairs than expected by chance, and also fewer observed combinations. 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Figure 4. Histogram of the number of species combinations and the number of checkerboard species pairs for the data in Figure 1. The blue vertical line indicates the observed data. By this test, the West Indies support more checkerboard species pairs but fewer species combinations than expected by chance."}
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Histogram of the number of species combinations and the number of checkerboard species pairs for the data in Figure 1. The blue vertical line indicates the observed data. By this test, the West Indies support more checkerboard species pairs but fewer species combinations than expected by chance."}
 MyDat <- as.data.frame(MyModel$Sim)
 binsize <- diff(range(MyModel$Sim))/4
 Histo1 <- ggplot(MyDat, aes(x=MyModel$Sim)) + geom_histogram(binwidth=binsize,fill="goldenrod", colour="black",origin=5) + xlab("Number Of Species Combinations") + annotate("segment", x=10,xend=10,y=0,yend=630, colour="steelblue",size=1)
@@ -170,11 +175,11 @@ multiplot(Histo1, Histo2,cols=2)
 
 However, this randomization implies that all species have an equal probability of occurrence, and all sites have an equal chance of receiving species. Both assumptions seem unrealistic: some islands (especially large ones) are more likely to accumulate species than others, and some species are likely to be more common than others. These differences among species and among islands could occur even in the absence of any species interactions.
 
-Two alternative algorithms incorporate more realistic assumptions. First, we could assume that different islands accumulate a random sample of species. The number of species on an island in each null assemblage is the same as in the original matrix. In otherwords, the marginal column sums of the matrix are maintained in each simulation. This model can be simulated by randomizing the elements within each column of the matrix. 
+Two alternative algorithms incorporate more realistic assumptions. First, we could assume that different islands accumulate a random sample of species. The number of species on an island in each null assemblage is the same as in the original matrix. In other words, the marginal column sums of the matrix are maintained in each simulation. This model (*Fixed Column Sums*) can be simulated by randomizing the elements within each column of the matrix. Alternatively, we can think of the different species as "sampling" the islands. In this model (*Fixed Row Sums*, the commonness and rarity of each species are preserved, the islands are treated as equiprobable, and the algorithm preserves the row totals of the original matrix for each randomization.
 
-Alternatively, we can think of the different specis as "sampling" the islands. In this model, the commonness and rarity of each species are preserved, the islands are treated as equiprobable, and the algorithm preserves the row totals of the original matrix for each randomization.
+For both of these algorithms, the number of species combinations is still smaller than expected by chance (Figure 5). However, the number of checkerboard distributions is unusually large when compared to the predictions of the *Fixed Column Sums* algorithm, but appears random when compared to the predictions of the *Fixed Row Sums* algorithm.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Null model simulations of Diamond's community assembly rules. The first row depicts the results from the Fixed Column Sums algorithm, in which the species presences in Figure 1 are randomly reshuffled within columns, which preserves the observed number of species on each island. The two histograms depict the number of species checkerboard pairs and the number of unique species combinations generated for 1000 simulated communities. The observed numbers for the data in Figure 1 are depicted as a blue vertical line. The second row gives the results for the Fixed Row Sums algorithm, in which the data are reshuffled within rows, which preserved the observed number of occurrences of each species." }
 MyModel3 <- cooc_null_model(speciesData=dataWiFinches,metric="checker", algo="sim3",   suppressProg=TRUE)
 m.checker <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),as.vector(MyModel3$Randomized.Data)))
 
@@ -214,21 +219,89 @@ Histo6 <- ggplot(MyDat6, aes(x=MyModel6$Sim)) + geom_histogram(binwidth=binsize,
 multiplot(Mat3,Mat4,Histo5,Histo6,Histo3,Histo4,cols=3)
 ```
 
-Connor and Simberloff chose to impose both constraints, preserving simultaneously the row and column totals of the matrix to generated the expected number of checkerboards and observed species combinations, conditional on these marginal constraints. Figure x shows one of these simulated matrices, which is visually much more similar to the original matrix than random matrices produced by the other algorithm. When tested against this pattern....
+## The Fixed-Fixed Algorithm
 
-This so-called "fixed-fixed" algorithm has become popular in the literature because it performs well when tested against random matrices with no inherent pattern. Preserving the matrix row and columns sums in the simulation also matches the intuition of field biologists, who recognize there are great differences in the inherent suitability of different islands and different species for successful colonization, even in the absence of species interactions and assembly rules.
+Connor and Simberloff chose to impose both constraints, preserving simultaneously the row and column totals of the matrix to generate the expected number of checkerboards and observed species combinations. Figure 6 shows one of these simulated matrices, which is visually much more similar to the original matrix than random matrices produced by the other algorithms. Results for this *Fixed-Fixed* algorithm are qualitatively the same as for the *Fixed Row Sums* algorithm: fewer species combinations than expected by chance, but no evidence that the number of checkerboard species pairs is unusual. Notice also in the histogram scales that the range of simulated values is much less for the *Fixed-Fixed* algorithm than any of the other recipes, again reflecting the constraint of matching both the row and column sums to those of the original matrix.
 
-The fixed-fixed algorithm also represents an interesting problem in matrix construction. In contrast to the other algorithms, preserving the matrix row and column totals simultaneously cannot be achieved by reshuffling row or column elements, because this destroys the totals in the other margin. Also, an algorithm that tries to consecutively fill the matrix with random elements usually gets stuck and reaches a point where any further additions will violate a row or column total.
+```{r fig.height=2.25, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Null model simulation in which row and columns are simultaneously fixed. Compare the matrix to that of Figure 1, which has the same marginal totals. For this, the most conservative of the algorithms, there are fewer species combinations than expected by chance, but the number of checkerboard pairs does not appear unusual." }
+MyModel3 <- cooc_null_model(speciesData=dataWiFinches,metric="checker", algo="sim9",   suppressProg=TRUE)
+m.checker <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),as.vector(MyModel3$Randomized.Data)))
 
-The best solution has been a Markov chain approach in which the elements of randomly selected submatrices are swapped in a way that preserves the row and column totals of the entire matrix. For example, a submatrix of 1010 can be swapped to generate 0101. These 4 elements of the matrix are now different, but the marginal totals are the same. Like a sliding tile picture puzzle, the original configuration eventually becomes randomized with enough consecutive swaps. Swapping will achieve a random, equiprobable sample of matrices from the very large sample space of all possible matrices with a fixed set of row and column sums.  
+Mat3 <- ggplot(m.checker, aes(x=V2, y=V1, fill=V3)) + geom_tile() + theme(legend.position="none")  + xlab("Islands") + ylab("Species")   
 
-Connor and Simberloff's original conclusion (based on a different data set and some different metrics) was that the evidence for Diamond's assembly rules was weak, and that observed patterns of species co-occurrence could be better explained by "chance" than by competition. 
+MyDat3 <- as.data.frame(MyModel3$Sim)
+binsize <- diff(range(MyModel3$Sim))/11
+Histo3 <- ggplot(MyDat3, aes(x=MyModel3$Sim)) + geom_histogram(binwidth=binsize,fill="goldenrod", colour="black") + xlab("Checkerboards") + annotate("segment", x=91,xend=91,y=0,yend=290, colour="steelblue",size=1)
 
-The publication of these two papers touched off a firestorm and controversy that has continued until the present. Critics of the null model approach complained that different algorithms and different methods could sometimes give contradictory answers to the same data set. But of course the same can be said for parametric analyses that used fixed or random-effects models, or Bayesian analyses that start with different prior distributions. Systematic comparison of different algorithms and metrics with artifical data sets has allowed for a better understanding of their behavior.
+MyModel4 <- cooc_null_model(speciesData=dataWiFinches,metric="species_combo", algo="sim9",   suppressProg=TRUE)
+m.checker <- as.data.frame(cbind(rep(1:17,19),rep(1:19,each=17),as.vector(MyModel4$Randomized.Data)))
+
+Mat4 <- ggplot(m.checker, aes(x=V2, y=V1, fill=V3)) + geom_tile() + theme(legend.position="none")  + xlab("Islands") + ylab("Species")   
+
+MyDat4 <- as.data.frame(MyModel4$Sim)
+binsize <- diff(range(MyModel4$Sim))/5
+Histo4 <- ggplot(MyDat4, aes(x=MyModel4$Sim)) + geom_histogram(binwidth=binsize,fill="goldenrod", colour="black",origin=9) + xlab("Combinations") + annotate("segment", x=10,xend=10,y=0,yend=425, colour="steelblue",size=1)
+
+multiplot(Mat3,Histo4,Histo3,cols=3)
+```
+
+This *Fixed-Fixed* algorithm has become popular in the literature because it performs well when tested against random matrices with no inherent pattern. Preserving the matrix row and columns sums in the simulation also matches the intuition of field biologists, who recognize there are great differences in the inherent suitability of different islands and different species for successful colonization, even in the absence of species interactions and assembly rules.
+
+The fixed-fixed algorithm represents an interesting problem in matrix construction. In contrast to the other algorithms, preserving the matrix row and column totals simultaneously cannot be achieved by reshuffling row or column elements, because this destroys the totals in the other margin. Also, an algorithm that tries to consecutively fill the matrix with random elements usually gets stuck and reaches a point where any further additions will violate a row or column total.
+
+## A Markov Swap
+
+The best solution has been a Markov chain approach in which the elements of randomly selected submatrices are swapped in a way that preserves the row and column totals of the entire matrix. For example, after randomly selecting two rows and two columns from the matrix, the elements in a 2 x 2 submatrix of this form: 
+
+
+$$ A_{sub} = 
+ \begin{pmatrix}
+  1 & \cdots & 0 \\
+  \vdots  & &  \vdots  \\
+  0 & \cdots & 1 \\
+ \end{pmatrix}
+$$
+
+can be swapped to create a new submatrix:
+
+$$ A_{sub} = 
+ \begin{pmatrix}
+  0 & \cdots & 1 \\
+  \vdots  & &  \vdots  \\
+  1 & \cdots & 0 \\
+ \end{pmatrix}
+$$
+
+
+
+These 4 elements of the submatrix are now different, but the marginal totals of the  entire matrix are the same. Like a sliding tile picture puzzle (Figure 7), the original configuration eventually becomes randomized with enough consecutive swaps. Swapping will achieve a random, equiprobable sample of matrices from the very large sample space of all possible matrices with a fixed set of row and column sums. Very recently, an efficient an unbiased variation of this algorithm has been published by Strona *et al.*, in which multiple checkerboard elements within entire rows of a two-species submatrix are swapped.   
+
+![The Markov chain swapping algorithm behaves like a sliding tile picture puzzle, in which consecutive random swaps to the binary presence absence matrix (Figure 1) obliterate the initial pattern.](Puzzle2.jpg)
+
+## Assembling The Pieces
+
+Connor and Simberloff's original conclusion (based on a different data set and some different metrics) was that the evidence for Diamond's assembly rules was weak, and that observed patterns of species co-occurrence could be better explained by "chance" than by competition. The publication of these two papers touched off a firestorm and controversy that has continued until the present. Critics of the null model approach complained that different algorithms and different methods could sometimes give contradictory answers to the same data set. But of course the same can be said for parametric analyses that used fixed or random-effects models, or Bayesian analyses that start with different prior distributions. Systematic comparison of different algorithms and metrics with artificial data sets has allowed for a better understanding of their behavior.
 
 Others have argued that the approach is biased against finding non-random effects because competition and other biological mechanisms are likely to affect the marginal totals of the matrix itself (especially the row totals of species occurrences), and so-called "Narcissus effect" smuggles in the influence of competition in the marginal constraints. The counter-argument is that not incorporating these constraints will cause the algorithm to reject the null hypothesis for simulated matrices that are entirely random. There is an inevitable trade-off here between conservative models such as the fixed-fixed algorithm, which may be vulnerable to Type II errors (incorrectly accepting a false null hypothesis) and more liberal algorithms such as the relaxed reshuffling of all matrix elements, which is more vulnerable to Type I errors (incorrectly rejecting a true null hypothesis).
 
 In spite of the long-term interest in this problem, these classic null model tests can only detect a pattern and allow for a statement of whether there are more or fewer checkerboard pairs than expected by chance. Unless we can explicitly assume that there are no differences in habitat preference and no dispersal constraints, then we cannot infer that species interactions are responsible for the pattern. For example, a particular pair of ant species may form a checkerboard pattern for at least 3 non-mutually exclusive reasons: 1) the pair fight to the death, so each island can support only 1 species, but not both; 2) there is no interaction between the two species, but species A prefers small dry islands, and species B prefers large wet islands, so they are never found together; 3) there is no interaction between the two species, but there is a major dispersal barrier present, so Species A is restricted to northern islands and Species B is restricted to southern islands. But a fan of competition theory could turn this argument on its head, and say that Species A is restricted to small dry islands or to northern islands *because* of competitive interactions with Species B.
 
-Randomization tests based only on the binary presence-absence matrix cannot tease apart these mechanisms. However, more recent approaches have begun to incorporate information on spatial pattern and habitat structure into the null models, and have even used an empirical Bayes approach to try and tease out the statistical significance of individual species pairs, as opposed to a single overall metric such as the number of checkerboard pairs for the entire matrix. In sum, the original controversy between Diamond and Connor and Simberloff over species co-occurrences on islands has opened up a rich archipelago of statistical approaches to exploring patterns of community assembly.
+## Staring At The Ink Blot
 
+Randomization tests based only on the binary presence-absence matrix cannot tease apart these mechanisms. However, more recent approaches have begun to incorporate information on spatial pattern and habitat structure into the null models, and have even used an empirical Bayes approach to try and tease out the statistical significance of individual species pairs, as opposed to a single overall metric such as the number of checkerboard pairs for the entire matrix. In sum, the original controversy between Diamond and Connor and Simberloff over species co-occurrences on islands has yielded a set of intriguing statistical puzzles that continue to inspire ecologists as they interpret patterns of community assembly.
+
+## Further Reading
+
+Connor, E.F. and D. Simberloff. 1986. Competition, scientific method, and null models in ecology. *American Scientist* 74(2):155-162.
+
+Connor, E.F., Collins, M.D. and D. Simberloff. 2013. The checkered history of checkerboard distributions. *Ecology* 94(11):2403-2413.
+
+Gotelli, N.J. and W. Ulrich. 2010. The empirical Bayes approach as a tool to identify non-random species associations. *Oecologia* 162(2):463-477.
+
+Gotelli, N.J. and W. Ulrich. 2012. Statistical challenges in null model analysis. *Oikos* 121(2):171-180.
+
+Strona. G., D. Nappo, F. Boccacci, S. Fattorini, and J. San-Miguel-Ayanz. 2014. A fast and unbiased procedure to randomize ecological binary matrices with fixed row and column totals. *Nature Communications* 5:4114 | DOI: 10.1038/ncomms5114.
+
+## About the Author
+
+***Nick Gotelli** is a Professor of Biology at the University of Vermont. His research interests include null model analysis, species distribution modeling, carnivorous plants, and the ecological and evolutionary responses of ants to climate change. With [Aaron Ellison](http://harvardforest.fas.harvard.edu/aaron-ellison), he is the author of [A Primer of Ecological Statistics](http://www.sinauer.com/a-primer-of-ecological-statistics.html), and, with [Aaron Ellison](http://harvardforest.fas.harvard.edu/aaron-ellison) and [Ted Hart](http://emhart.info/), he is the author of [EcoSimR](http://ecosimr.org/), an R package for null model analysis.*
